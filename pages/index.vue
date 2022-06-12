@@ -1,20 +1,29 @@
 <template>
   <div class="wrap">
-    <div class="continer">
-      <section id="fv" class="section-fixed fv active">
-        <p class="">1ページ目</p>
+    <div class="continer" @wheel="changeScreen">
+      <div class="status">
+        <span class="status__head">ステータス：</span>
+        <span class="status__body">{{ countFlg ? '切り替え可能' : '切り替え制限中' }}</span>
+      </div>
+
+      <section id="fv" class="screen fv active">
+        <p class="screen__text">{{ count }}ページ目 FV</p>
       </section>
 
-      <section id="news" class="section-fixed news">
-        <p class="">2ページ目</p>
+      <section id="news" class="screen news next-active">
+        <p class="screen__text">{{ count }}ページ目 NEWS</p>
       </section>
 
-      <section id="profile" class="section-fixed profile">
-        <p class="">3ページ目</p>
+      <section id="profile" class="screen profile">
+        <p class="screen__text">{{ count }}ページ目 PROFILE</p>
       </section>
 
-      <section id="other" class="section-fixed other">
-        <p class="">4ページ目</p>
+      <section id="gallery" class="screen gallery">
+        <p class="screen__text">{{ count }}ページ目 GALLERY</p>
+      </section>
+
+      <section id="other" class="screen other">
+        <p class="screen__text">{{ count }}ページ目 OTHER</p>
       </section>
 
     </div>
@@ -46,7 +55,19 @@
     height: 100vh;
     overflow: hidden;
   }
-  .section-fixed {
+  .status {
+    position: relative;
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 1;
+    &__head {
+      color: #fff;
+    }
+    &__body {
+      color: #ee7800;
+    }
+  }
+  .screen {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -61,17 +82,29 @@
       pointer-events: auto;
       animation: upAnime ease 2s;
     }
+    &__text {
+      position: absolute;
+      font-size: 50px;
+      color: #fff;
+      font-weight: bold;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+    }
     &.fv {
-      background-image: url("https://placehold.jp/111/1366x768.png");
+      background-image: url("/images/bg_01.jpg");
     }
     &.news {
-      background-image: url("https://placehold.jp/333/1366x768.png");
+      background-image: url("/images/bg_02.jpg");
     }
     &.profile {
-      background-image: url("https://placehold.jp/666/1366x768.png");
+      background-image: url("/images/bg_03.jpg");
+    }
+    &.gallery {
+      background-image: url("/images/bg_05.jpg");
     }
     &.other {
-      background-image: url("https://placehold.jp/999/1366x768.png");
+      background-image: url("/images/bg_04.jpg");
     }
   }
 </style>
@@ -89,40 +122,38 @@ export default {
     }
   },
 
-  mounted() {
-    window.addEventListener('wheel',this.scrollSwitch);
-  },
-
-
   methods: {
-    scrollSwitch: function(e) {
-      const scrollDistance = e.deltaY;
-      let contents = document.querySelectorAll('.section-fixed');
-      
+    changeScreen: function(e) {
+      const contents = document.querySelectorAll('.screen');
+
       if(this.countFlg) {
-        if (scrollDistance > 200) {
-          // 下のコンテンツに移動
-          this.count++;
-          console.log(`実装後 ${this.count}`);
-          if(this.count > contents.length) {
-            this.count = contents.length;
-          }
-          setTimeout(function () {
-            this.countFlg = true;
-          },5000);
-        } else if (scrollDistance < -200) {
-          // 上のコンテンツに移動
-          this.count--;
+        if(e.deltaY > 100) {
           if(this.count < contents.length) {
-            this.count = 1;
+            this.count++;
+            this.countFlg = false;
+            setTimeout(this.changeCountFlg,3000);
+          }
+
+        } else if(e.deltaY < -100) {
+          if(this.count > 1) {
+            this.count--;
+            this.countFlg = false;
+            setTimeout(this.changeCountFlg,3000);
           }
         }
       }
+
       for(let i = 0; i < contents.length; i++) {
-        contents[i].classList.remove('active')
+        contents[i].classList.remove('active');
+        
+        contents[this.count - 1].classList.add('active');
       };
-      contents[this.count - 1].classList.add('active');
+    },
+
+    changeCountFlg: function(){
+      return this.countFlg = true;
     },
   },
+
 }
 </script>
